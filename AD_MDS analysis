@@ -26,3 +26,50 @@ Check the length of the lists:
 5457850
 
 Sizes correlate with expected.
+
+2. Make plink files from the vcfs using the union SNP set
+
+First need to merge AD chromosomal vcfs into one single file using this command:
+
+java -jar -Xmx12G /gpfs0/apps/well/gatk/3.5-0/\
+GenomeAnalysisTK.jar \
+-T CombineVariants \
+-R /well/jknight/kate/exomes/hs37d5/hs37d5.fa \
+--genotypemergeoption UNSORTED \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_1.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_2.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_3.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_4.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_5.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_6.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_7.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_8.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_9.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_10.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_11.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_12.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_13.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_14.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_15.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_16.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_17.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_18.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_19.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_20.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_20.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_21.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_22.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_X.annovar.dbsnp.vcf.gz \
+--variant /well/jknight/kate/exomes/haploc_geno/AD/AD_Y.annovar.dbsnp.vcf.gz \
+-o /well/jknight/kate/exomes/haploc_geno/AD/AD_all_chrs.annovar.dbsnp.vcf
+
+Then use this command to make the tmap and tped files:
+
+/apps/well/vcftools/0.1.12a/bin/vcftools \
+--gzvcf /well/jknight/kate/exomes/haploc_geno/AD/AD_all_chrs.annovar.dbsnp.vcf.gz \
+--snps 1000G_AD_union_SNPs_all.txt \
+--remove-indels \
+--plink-tped \
+--out AD_all_chrs_filtered_for_PCA
+
+Note - the --geno 0.9 option isn't included here because it isn't available in this version of vcftolls.  Since the QC'd SNPs require a minimum filtering anyway, this isn't necessary.
