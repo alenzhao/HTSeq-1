@@ -1,0 +1,28 @@
+MDS analysis of Abu Dhabi Emirati trio
+
+Compare to 1000G phase 3 data
+
+1. Make a list of overlapping SNPs between AD trio and 1000G
+
+Use cat and cut to make lists of SNPs from the 1000G vcfs and AD vcfs
+Sort the lists of SNPs using the sort command
+
+eg. cat ../../1000G/phase3_all_SNPs_list.txt | sort > ../../1000G/phase3_all_SNPs_list.sorted.txt
+
+Use comm (the unix compare command) to find the union between the SNP sets.
+
+comm -1 -2 ../../1000G/phase3_all_SNPs_list.sorted.txt ../../anno/AD/AD_QC_genome_SNPs_for_PCA.sorted.txt > 1000G_AD_union_SNPs_all.txt
+
+-1 means exclude SNPs unique to the first file
+-2 means exclude SNPs unique to the second file
+
+Check the length of the lists:
+
+[kelliott@rescomp2 AD_MDS]$ cat ../../1000G/phase3_all_SNPs_list.sorted.txt | wc -l
+84739838
+[kelliott@rescomp2 AD_MDS]$ cat ../../anno/AD/AD_QC_genome_SNPs_for_PCA.sorted.txt | wc -l
+5995864
+[kelliott@rescomp2 AD_MDS]$ cat 1000G_AD_union_SNPs_all.txt | wc -l
+5457850
+
+Sizes correlate with expected.
