@@ -86,7 +86,7 @@ Note - the --geno 0.9 option isn't included here because it isn't available in t
 
 This makes a list of SNPs only which can then be used to make the pruned subset files for each of the population files which will go into the MDS analysis.
 
-4. Make the pruned subset files for each of the population files and convert to standard plink format using the following command:
+4. Make the pruned subset files for each of the 1000G files and convert to standard plink format using the following command:
 
 for chr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y
 do
@@ -96,35 +96,43 @@ echo $chr
 --snps AD_all_chrs_filtered_for_PCA.pruned.prune.in \
 --remove-indels \
 --plink-tped \
---out AD_$chr\_filtered_for_PCA_pruned
+--out 1000G_p3_$chr\_filtered_for_PCA_pruned
 
 /apps/well/plink/1.90b2n/plink \
---tfile AD_$chr\_filtered_for_PCA_pruned \
+--tfile 1000G_p3_$chr\_filtered_for_PCA_pruned \
 --1 --allow-no-sex --noweb \
---recode --out AD_$chr\_filtered_for_PCA_pruned
+--recode --out 1000G_p3_$chr\_filtered_for_PCA_pruned
 done
 
-5. The separate chromsome files then need combining using this less than optimal method (!)
+5. The separate 1000G chromsome files then need combining using this less than optimal method (!)
 
-/apps/well/plink/1.90b2n/plink --file AD_1_filtered_for_PCA_pruned --merge AD_2_filtered_for_PCA_pruned.ped AD_2_filtered_for_PCA_pruned.map --recode --allow-no-sex --out AD_merge_1_2 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_3_filtered_for_PCA_pruned --merge AD_4_filtered_for_PCA_pruned.ped AD_4_filtered_for_PCA_pruned.map --recode --allow-no-sex --out AD_merge_3_4 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_5_filtered_for_PCA_pruned --merge AD_6_filtered_for_PCA_pruned.ped AD_6_filtered_for_PCA_pruned.map --recode --allow-no-sex --out AD_merge_5_6 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_7_filtered_for_PCA_pruned --merge AD_8_filtered_for_PCA_pruned.ped AD_8_filtered_for_PCA_pruned.map --recode --allow-no-sex --out AD_merge_7_8 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_9_filtered_for_PCA_pruned --merge AD_10_filtered_for_PCA_pruned.ped AD_10_filtered_for_PCA_pruned.map --recode --allow-no-sex --out AD_merge_9_10 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_11_filtered_for_PCA_pruned --merge AD_12_filtered_for_PCA_pruned.ped AD_12_filtered_for_PCA_pruned.map --recode --allow-no-sex --out AD_merge_11_12 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_13_filtered_for_PCA_pruned --merge AD_14_filtered_for_PCA_pruned.ped AD_14_filtered_for_PCA_pruned.map --recode --allow-no-sex --out AD_merge_13_14 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_15_filtered_for_PCA_pruned --merge AD_16_filtered_for_PCA_pruned.ped AD_16_filtered_for_PCA_pruned.map --recode --allow-no-sex --out AD_merge_15_16 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_17_filtered_for_PCA_pruned --merge AD_18_filtered_for_PCA_pruned.ped AD_18_filtered_for_PCA_pruned.map --recode --allow-no-sex --out AD_merge_17_18 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_19_filtered_for_PCA_pruned --merge AD_20_filtered_for_PCA_pruned.ped AD_20_filtered_for_PCA_pruned.map --recode --allow-no-sex --out AD_merge_19_20 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_21_filtered_for_PCA_pruned --merge AD_22_filtered_for_PCA_pruned.ped AD_22_filtered_for_PCA_pruned.map --recode --allow-no-sex --out AD_merge_21_22 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_merge_1_2 --merge AD_merge_3_4.ped AD_merge_3_4.map --recode --allow-no-sex --out AD_merge_1_4 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_merge_5_6 --merge AD_merge_7_8.ped AD_merge_7_8.map --recode --allow-no-sex --out AD_merge_5_8 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_merge_9_10 --merge AD_merge_11_12.ped AD_merge_11_12.map --recode --allow-no-sex --out AD_merge_9_12 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_merge_13_14 --merge AD_merge_15_16.ped AD_merge_15_16.map --recode --allow-no-sex --out AD_merge_13_16 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_merge_17_18 --merge AD_merge_19_20.ped AD_merge_19_20.map --recode --allow-no-sex --out AD_merge_17_20 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_merge_17_20 --merge AD_merge_21_22.ped AD_merge_21_22.map --recode --allow-no-sex --out AD_merge_17_22 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_merge_1_4 --merge AD_merge_5_8.ped AD_merge_5_8.map --recode --allow-no-sex --out AD_merge_1_8 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_merge_1_8 --merge AD_merge_9_12.ped AD_merge_9_12.map --recode --allow-no-sex --out AD_merge_1_12 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_merge_1_12 --merge AD_merge_13_16.ped AD_merge_13_16.map --recode --allow-no-sex --out AD_merge_1_16 --noweb
-/apps/well/plink/1.90b2n/plink --file AD_merge_1_16 --merge AD_merge_17_22.ped AD_merge_17_22.map --recode --allow-no-sex --out AD_merge_1_22 --noweb
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_1_filtered_for_PCA_pruned --merge 1000G_p3_2_filtered_for_PCA_pruned.ped 1000G_p3_2_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_1_2
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_3_filtered_for_PCA_pruned --merge 1000G_p3_4_filtered_for_PCA_pruned.ped 1000G_p3_4_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_3_4
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_5_filtered_for_PCA_pruned --merge 1000G_p3_6_filtered_for_PCA_pruned.ped 1000G_p3_6_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_5_6
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_7_filtered_for_PCA_pruned --merge 1000G_p3_8_filtered_for_PCA_pruned.ped 1000G_p3_8_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_7_8
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_9_filtered_for_PCA_pruned --merge 1000G_p3_10_filtered_for_PCA_pruned.ped 1000G_p3_10_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_9_10
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_11_filtered_for_PCA_pruned --merge 1000G_p3_12_filtered_for_PCA_pruned.ped 1000G_p3_12_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_11_12
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_13_filtered_for_PCA_pruned --merge 1000G_p3_14_filtered_for_PCA_pruned.ped 1000G_p3_14_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_13_14
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_15_filtered_for_PCA_pruned --merge 1000G_p3_16_filtered_for_PCA_pruned.ped 1000G_p3_16_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_15_16
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_17_filtered_for_PCA_pruned --merge 1000G_p3_18_filtered_for_PCA_pruned.ped 1000G_p3_18_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_17_18
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_19_filtered_for_PCA_pruned --merge 1000G_p3_20_filtered_for_PCA_pruned.ped 1000G_p3_20_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_19_20
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_21_filtered_for_PCA_pruned --merge 1000G_p3_22_filtered_for_PCA_pruned.ped 1000G_p3_22_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_21_22
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_1_2 --merge 1000G_p3_merge_3_4.ped 1000G_p3_merge_3_4.map --recode --allow-no-sex --out 1000G_p3_merge_1_4
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_5_6 --merge 1000G_p3_merge_7_8.ped 1000G_p3_merge_7_8.map --recode --allow-no-sex --out 1000G_p3_merge_5_8
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_9_10 --merge 1000G_p3_merge_11_12.ped 1000G_p3_merge_11_12.map --recode --allow-no-sex --out 1000G_p3_merge_9_12
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_13_14 --merge 1000G_p3_merge_15_16.ped 1000G_p3_merge_15_16.map --recode --allow-no-sex --out 1000G_p3_merge_13_16
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_17_18 --merge 1000G_p3_merge_19_20.ped 1000G_p3_merge_19_20.map --recode --allow-no-sex --out 1000G_p3_merge_17_20
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_17_20 --merge 1000G_p3_merge_21_22.ped 1000G_p3_merge_21_22.map --recode --allow-no-sex --out 1000G_p3_merge_17_22
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_1_4 --merge 1000G_p3_merge_5_8.ped 1000G_p3_merge_5_8.map --recode --allow-no-sex --out 1000G_p3_merge_1_8
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_1_8 --merge 1000G_p3_merge_9_12.ped 1000G_p3_merge_9_12.map --recode --allow-no-sex --out 1000G_p3_merge_1_12
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_1_12 --merge 1000G_p3_merge_13_16.ped 1000G_p3_merge_13_16.map --recode --allow-no-sex --out 1000G_p3_merge_1_16
+/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_1_16 --merge 1000G_p3_merge_17_22.ped 1000G_p3_merge_17_22.map --recode --allow-no-sex --out 1000G_p3_all_chrs_filtered_for_PCA_pruned
+
+When the chromosome merging has completed without errors, delete the merge files to clean up the directory.
+
+6.  Make the same pruned subset file for AD from the vcf and then convert to plink format.
+
+
+
+6. Merge together the population files - 1000G and AD
 
