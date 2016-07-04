@@ -1,138 +1,158 @@
 MDS analysis of Abu Dhabi Emirati trio
 
-Compare to 1000G phase 3 data
+Completely rearrange the process to incorporate an earlier merge of 1000G data with samples of interest.  This is because merging later when the files are in plink format is problematic - plink cannot identify because ref and alt alleles.  Therefore merging with plink can cause multiple alleles errors.
 
-1. Make a list of overlapping SNPs between AD trio and 1000G
-
-Use cat and cut to make lists of SNPs from the 1000G vcfs and AD vcfs
-Sort the lists of SNPs using the sort command
-
-eg. cat ../../1000G/phase3_all_SNPs_list.txt | sort > ../../1000G/phase3_all_SNPs_list.sorted.txt
-
-Use comm (the unix compare command) to find the union between the SNP sets.
-
-comm -1 -2 ../../1000G/phase3_all_SNPs_list.sorted.txt ../../anno/AD/AD_QC_genome_SNPs_for_PCA.sorted.txt > 1000G_AD_union_SNPs_all.txt
-
--1 means exclude SNPs unique to the first file
--2 means exclude SNPs unique to the second file
-
-Check the length of the lists:
-
-[kelliott@rescomp2 AD_MDS]$ cat ../../1000G/phase3_all_SNPs_list.sorted.txt | wc -l
-84739838
-[kelliott@rescomp2 AD_MDS]$ cat ../../anno/AD/AD_QC_genome_SNPs_for_PCA.sorted.txt | wc -l
-5995864
-[kelliott@rescomp2 AD_MDS]$ cat 1000G_AD_union_SNPs_all.txt | wc -l
-5457850
-
-Sizes correlate with expected.
-
-2. Make plink files from the vcfs using the union SNP set
-
-First need to merge AD chromosomal vcfs into one single file using this command:
-
-java -jar -Xmx12G /gpfs0/apps/well/gatk/3.5-0/\
-GenomeAnalysisTK.jar \
--T CombineVariants \
--R /well/jknight/kate/exomes/hs37d5/hs37d5.fa \
---genotypemergeoption UNSORTED \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_1.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_2.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_3.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_4.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_5.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_6.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_7.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_8.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_9.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_10.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_11.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_12.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_13.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_14.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_15.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_16.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_17.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_18.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_19.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_20.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_20.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_21.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_22.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_X.annovar.dbsnp.vcf.gz \
---variant /well/jknight/kate/exomes/haploc_geno/AD/AD_Y.annovar.dbsnp.vcf.gz \
--o /well/jknight/kate/exomes/haploc_geno/AD/AD_all_chrs.annovar.dbsnp.vcf
-
-Then use this command to make the tmap and tped files:
-
-/apps/well/vcftools/0.1.12a/bin/vcftools \
---gzvcf /well/jknight/kate/exomes/haploc_geno/AD/AD_all_chrs.annovar.dbsnp.vcf.gz \
---snps 1000G_AD_union_SNPs_all.txt \
---remove-indels \
---plink-tped \
---out AD_all_chrs_filtered_for_PCA
-
-Note - the --geno 0.9 option isn't included here because it isn't available in this version of vcftolls.  Since the QC'd SNPs require a minimum filtering anyway, this isn't necessary.
-
-3. LD prune the SNPs using this plink command:
+#!/bin/bash 
+#$ -S /bin/bash
+#$ -cwd
+#$ -P jknight.prjc
+#$ -q short.qc
+#$ -o qlogs/
+#$ -j y
+#$ -V
 
 /apps/well/plink/1.90b2n/plink \
---tfile AD_all_chrs_filtered_for_PCA \
---indep-pairwise 50 5 0.2 --maf 0.1 \
---1 \
---allow-no-sex \
---noweb \
---out AD_all_chrs_filtered_for_PCA.pruned
-
-This makes a list of SNPs only which can then be used to make the pruned subset files for each of the population files which will go into the MDS analysis.
-
-4. Make the pruned subset files for each of the 1000G files and convert to standard plink format using the following command:
-
-for chr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y
-do
-echo $chr
-/apps/well/vcftools/0.1.12a/bin/vcftools \
---gzvcf /well/jknight/kate/exomes/1000G/ALL.chr$chr.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz \
---snps AD_all_chrs_filtered_for_PCA.pruned.prune.in \
---remove-indels \
---plink-tped \
---out 1000G_p3_$chr\_filtered_for_PCA_pruned
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_1_filtered_for_PCA_pruned \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_2_filtered_for_PCA_pruned.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_2_filtered_for_PCA_pruned.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_1_2
 
 /apps/well/plink/1.90b2n/plink \
---tfile 1000G_p3_$chr\_filtered_for_PCA_pruned \
---1 --allow-no-sex --noweb \
---recode --out 1000G_p3_$chr\_filtered_for_PCA_pruned
-done
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_3_filtered_for_PCA_pruned \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_4_filtered_for_PCA_pruned.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_4_filtered_for_PCA_pruned.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_3_4
 
-5. The separate 1000G chromsome files then need combining using this less than optimal method (!)
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_5_filtered_for_PCA_pruned \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_6_filtered_for_PCA_pruned.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_6_filtered_for_PCA_pruned.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_5_6
 
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_1_filtered_for_PCA_pruned --merge 1000G_p3_2_filtered_for_PCA_pruned.ped 1000G_p3_2_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_1_2
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_3_filtered_for_PCA_pruned --merge 1000G_p3_4_filtered_for_PCA_pruned.ped 1000G_p3_4_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_3_4
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_5_filtered_for_PCA_pruned --merge 1000G_p3_6_filtered_for_PCA_pruned.ped 1000G_p3_6_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_5_6
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_7_filtered_for_PCA_pruned --merge 1000G_p3_8_filtered_for_PCA_pruned.ped 1000G_p3_8_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_7_8
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_9_filtered_for_PCA_pruned --merge 1000G_p3_10_filtered_for_PCA_pruned.ped 1000G_p3_10_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_9_10
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_11_filtered_for_PCA_pruned --merge 1000G_p3_12_filtered_for_PCA_pruned.ped 1000G_p3_12_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_11_12
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_13_filtered_for_PCA_pruned --merge 1000G_p3_14_filtered_for_PCA_pruned.ped 1000G_p3_14_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_13_14
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_15_filtered_for_PCA_pruned --merge 1000G_p3_16_filtered_for_PCA_pruned.ped 1000G_p3_16_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_15_16
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_17_filtered_for_PCA_pruned --merge 1000G_p3_18_filtered_for_PCA_pruned.ped 1000G_p3_18_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_17_18
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_19_filtered_for_PCA_pruned --merge 1000G_p3_20_filtered_for_PCA_pruned.ped 1000G_p3_20_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_19_20
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_21_filtered_for_PCA_pruned --merge 1000G_p3_22_filtered_for_PCA_pruned.ped 1000G_p3_22_filtered_for_PCA_pruned.map --recode --allow-no-sex --out 1000G_p3_merge_21_22
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_1_2 --merge 1000G_p3_merge_3_4.ped 1000G_p3_merge_3_4.map --recode --allow-no-sex --out 1000G_p3_merge_1_4
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_5_6 --merge 1000G_p3_merge_7_8.ped 1000G_p3_merge_7_8.map --recode --allow-no-sex --out 1000G_p3_merge_5_8
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_9_10 --merge 1000G_p3_merge_11_12.ped 1000G_p3_merge_11_12.map --recode --allow-no-sex --out 1000G_p3_merge_9_12
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_13_14 --merge 1000G_p3_merge_15_16.ped 1000G_p3_merge_15_16.map --recode --allow-no-sex --out 1000G_p3_merge_13_16
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_17_18 --merge 1000G_p3_merge_19_20.ped 1000G_p3_merge_19_20.map --recode --allow-no-sex --out 1000G_p3_merge_17_20
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_17_20 --merge 1000G_p3_merge_21_22.ped 1000G_p3_merge_21_22.map --recode --allow-no-sex --out 1000G_p3_merge_17_22
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_1_4 --merge 1000G_p3_merge_5_8.ped 1000G_p3_merge_5_8.map --recode --allow-no-sex --out 1000G_p3_merge_1_8
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_1_8 --merge 1000G_p3_merge_9_12.ped 1000G_p3_merge_9_12.map --recode --allow-no-sex --out 1000G_p3_merge_1_12
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_1_12 --merge 1000G_p3_merge_13_16.ped 1000G_p3_merge_13_16.map --recode --allow-no-sex --out 1000G_p3_merge_1_16
-/apps/well/plink/1.90b2n/plink --file 1000G_p3_merge_1_16 --merge 1000G_p3_merge_17_22.ped 1000G_p3_merge_17_22.map --recode --allow-no-sex --out 1000G_p3_all_chrs_filtered_for_PCA_pruned
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_7_filtered_for_PCA_pruned \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_8_filtered_for_PCA_pruned.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_8_filtered_for_PCA_pruned.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_7_8
 
-When the chromosome merging has completed without errors, delete the merge files to clean up the directory.
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_9_filtered_for_PCA_pruned \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_10_filtered_for_PCA_pruned.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_10_filtered_for_PCA_pruned.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_9_10
 
-6.  Make the same pruned subset file for AD from the vcf and then convert to plink format.
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_11_filtered_for_PCA_pruned \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_12_filtered_for_PCA_pruned.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_12_filtered_for_PCA_pruned.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_11_12
 
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_13_filtered_for_PCA_pruned \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_14_filtered_for_PCA_pruned.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_14_filtered_for_PCA_pruned.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_13_14
 
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_15_filtered_for_PCA_pruned \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_16_filtered_for_PCA_pruned.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_16_filtered_for_PCA_pruned.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_15_16
 
-6. Merge together the population files - 1000G and AD
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_17_filtered_for_PCA_pruned \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_18_filtered_for_PCA_pruned.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_18_filtered_for_PCA_pruned.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_17_18
+
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_19_filtered_for_PCA_pruned \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_20_filtered_for_PCA_pruned.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_20_filtered_for_PCA_pruned.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_19_20
+
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_21_filtered_for_PCA_pruned \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_22_filtered_for_PCA_pruned.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_22_filtered_for_PCA_pruned.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_21_22
+
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_1_2 \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_3_4.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_3_4.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_1_4
+
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_5_6 \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_7_8.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_7_8.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_5_8
+
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_9_10 \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_11_12.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_11_12.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_9_12
+
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_13_14 \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_15_16.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_15_16.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_13_16
+
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_17_18 \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_19_20.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_19_20.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_17_20
+
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_17_20 \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_21_22.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_21_22.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_17_22
+
+/apps/well/plink/1.90b2n/plink \
+-file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_1_4 \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_5_8.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_5_8.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_1_8
+
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_1_8 \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_9_12.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_9_12.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_1_12
+
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_1_12 \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_13_16.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_13_16.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_1_16
+
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_1_16 \
+--merge /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_17_22.ped \
+/well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_merge_17_22.map \
+--recode --allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_all_chrs
+
+# remove regions of hi LD
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_all_chrs \
+--exclude /well/jknight/kate/exomes/plink/AD_MDS/high-LD-regions-updated-b37.txt \
+--range --recode --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_all_chrs_exhiLD
+
+echo make genome file
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_all_chrs_exhiLD \
+--genome --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_all_chrs_exhiLD
+
+echo run MDS analysis
+/apps/well/plink/1.90b2n/plink \
+--file /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_all_chrs_exhiLD \
+--read-genome /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_all_chrs_exhiLD.genome \
+--cluster --mds-plot 4 \
+--allow-no-sex --out /well/jknight/kate/exomes/plink/AD_MDS/AD_1000G_p3_MDS4
+
 
