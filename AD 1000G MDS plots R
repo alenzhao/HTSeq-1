@@ -1,0 +1,32 @@
+# R script for plotting Abu Dhabi trio MDS results
+
+mds.cluster = read.table("AD_1000G_p3_MDS4_pop.mds", header=T, stringsAsFactors=FALSE)
+pdf(file="AD_trio_1000G_MDS_dim1_2.pdf")
+plot(mds.cluster$C1, mds.cluster$C2, col=mds.cluster$col, ylab="Dimension 1", xlab="Dimension 2", pch=20)
+legend("top", pt.cex=1, cex=0.8, c("EMR (Emirati)","YRI (Yoruba, Nigeria)","LWK (Luhya, Kenya)","ASW (Africans, USA)","PUR (Puerto Ricans)","CLM (Columbians)","IBS (Iberia, Spain)","TSI (Toscani, Italy)","GBR (British)","FIN (Finnish)","CEU (Utah N Eur)","MXL (Mexicans in LA)","JPT (Tokyo, Japan)","CHS (Southern China)","CHB (Beijing, China)"),fill=c("#000000","#660000","#990000","#FF0000","#FF6600","#FFCC00","#CCFF33","#CCFF33","#00CC00","#00CC99","#006600","#3333FF","#6600FF","#9900FF","#FF33FF"))
+dev.off()
+
+pdf(file="AD_trio_1000G_MDS_dim1_3.pdf")
+plot(mds.cluster$C1, mds.cluster$C3, col=mds.cluster$col, ylab="Dimension 1", xlab="Dimension 3", pch=20)
+legend("center", pt.cex=1, cex=0.8, c("EMR (Emirati)","YRI (Yoruba, Nigeria)","LWK (Luhya, Kenya)","ASW (Africans, USA)","PUR (Puerto Ricans)","CLM (Columbians)","IBS (Iberia, Spain)","TSI (Toscani, Italy)","GBR (British)","FIN (Finnish)","CEU (Utah N Eur)","MXL (Mexicans in LA)","JPT (Tokyo, Japan)","CHS (Southern China)","CHB (Beijing, China)"),fill=c("#000000","#660000","#990000","#FF0000","#FF6600","#FFCC00","#CCFF33","#CCFF33","#00CC00","#00CC99","#006600","#3333FF","#6600FF","#9900FF","#FF33FF"))
+dev.off()
+
+pdf(file="AD_trio_1000G_MDS_dim1_4.pdf")
+plot(mds.cluster$C1, mds.cluster$C4, col=mds.cluster$col, ylab="Dimension 1", xlab="Dimension 4", pch=20)
+legend("bottomleft", pt.cex=1, cex=0.8, c("EMR (Emirati)","YRI (Yoruba, Nigeria)","LWK (Luhya, Kenya)","ASW (Africans, USA)","PUR (Puerto Ricans)","CLM (Columbians)","IBS (Iberia, Spain)","TSI (Toscani, Italy)","GBR (British)","FIN (Finnish)","CEU (Utah N Eur)","MXL (Mexicans in LA)","JPT (Tokyo, Japan)","CHS (Southern China)","CHB (Beijing, China)"),fill=c("#000000","#660000","#990000","#FF0000","#FF6600","#FFCC00","#CCFF33","#CCFF33","#00CC00","#00CC99","#006600","#3333FF","#6600FF","#9900FF","#FF33FF"))
+dev.off()
+
+pdf(file="AD_trio_1000G_MDS_dim2_3.pdf")
+plot(mds.cluster$C2, mds.cluster$C3, col=mds.cluster$col, ylab="Dimension 2", xlab="Dimension 3", pch=20)
+legend(x=0.03,y=0.05, pt.cex=1, cex=0.8, c("EMR (Emirati)","YRI (Yoruba, Nigeria)","LWK (Luhya, Kenya)","ASW (Africans, USA)","PUR (Puerto Ricans)","CLM (Columbians)","IBS (Iberia, Spain)","TSI (Toscani, Italy)","GBR (British)","FIN (Finnish)","CEU (Utah N Eur)","MXL (Mexicans in LA)","JPT (Tokyo, Japan)","CHS (Southern China)","CHB (Beijing, China)"),fill=c("#000000","#660000","#990000","#FF0000","#FF6600","#FFCC00","#CCFF33","#CCFF33","#00CC00","#00CC99","#006600","#3333FF","#6600FF","#9900FF","#FF33FF"))
+dev.off()
+
+pdf(file="AD_trio_1000G_MDS_dim2_4.pdf")
+plot(mds.cluster$C2, mds.cluster$C4, col=mds.cluster$col, ylab="Dimension 2", xlab="Dimension 4", pch=20)
+legend("right", pt.cex=1, cex=0.8, c("EMR (Emirati)","YRI (Yoruba, Nigeria)","LWK (Luhya, Kenya)","ASW (Africans, USA)","PUR (Puerto Ricans)","CLM (Columbians)","IBS (Iberia, Spain)","TSI (Toscani, Italy)","GBR (British)","FIN (Finnish)","CEU (Utah N Eur)","MXL (Mexicans in LA)","JPT (Tokyo, Japan)","CHS (Southern China)","CHB (Beijing, China)"),fill=c("#000000","#660000","#990000","#FF0000","#FF6600","#FFCC00","#CCFF33","#CCFF33","#00CC00","#00CC99","#006600","#3333FF","#6600FF","#9900FF","#FF33FF"))
+dev.off()
+
+pdf(file="AD_trio_1000G_MDS_dim3_4.pdf")
+plot(mds.cluster$C3, mds.cluster$C4, col=mds.cluster$col, ylab="Dimension 3", xlab="Dimension 4", pch=20)
+legend(x=-0.01,y=-0.05, pt.cex=1, cex=0.8, c("EMR (Emirati)","YRI (Yoruba, Nigeria)","LWK (Luhya, Kenya)","ASW (Africans, USA)","PUR (Puerto Ricans)","CLM (Columbians)","IBS (Iberia, Spain)","TSI (Toscani, Italy)","GBR (British)","FIN (Finnish)","CEU (Utah N Eur)","MXL (Mexicans in LA)","JPT (Tokyo, Japan)","CHS (Southern China)","CHB (Beijing, China)"),fill=c("#000000","#660000","#990000","#FF0000","#FF6600","#FFCC00","#CCFF33","#CCFF33","#00CC00","#00CC99","#006600","#3333FF","#6600FF","#9900FF","#FF33FF"))
+dev.off()
