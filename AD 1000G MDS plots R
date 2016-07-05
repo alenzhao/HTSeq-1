@@ -1,3 +1,26 @@
+The different dimensions resulting from the MDS analysis were plotted using R
+
+The following colours were used for the different populations and are mainly related to their position along dimension 1.
+
+EMR (Emirati)	EMR	"#000000"	black
+YRI (Yoruba, Nigeria)	YRI	"#660000"	vdark-red
+LWK (Luhya, Kenya)	LWK	"#990000"	dark-red
+ASW (Africans, USA)	ASW	"#FF0000"	red
+PUR (Puerto Ricans)	PUR	"#FF6600"	orange
+CLM (Columbians)	CLM	"#FFCC00"	yellow
+IBS (Iberia, Spain)	IBS	"#CCFF33"	lime
+TSI (Toscani, Italy)	TSI	"#99CC00"	leaf
+GBR (British)	GBR	"#00CC00"	green
+CEU (Utah N Eur)	CEU	"#006600"	dark-green
+FIN (Finnish)	FIN	"#00CC99"	teal
+MXL (Mexicans in LA)	MXL	"#3333FF"	blue
+JPT (Tokyo, Japan)	JPT	"#6600FF"	purple-blue
+CHS (Southern China)	CHS	"#9900FF"	purple
+CHB (Beijing, China)	CHB	"#FF33FF"	fuschia
+
+These colours were added as columns to the mds file produced by plink using VLOOKUP in excel.  The resulting txt file was then imported into R using read.table.  Note: use stringsAsFactors=FALSE in the importing to make sure items are imported in the right format.
+
+
 # R script for plotting Abu Dhabi trio MDS results
 
 mds.cluster = read.table("AD_1000G_p3_MDS4_pop.mds", header=T, stringsAsFactors=FALSE)
