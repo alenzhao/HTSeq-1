@@ -1,0 +1,7 @@
+First analyse the AD individuals on their own without looking at the context of 1000G samples
+
+736 samples in total including some trios
+
+Clean the data:
+remove missingness > 0.05
+remove monomorphic SNPs
